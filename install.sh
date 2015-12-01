@@ -23,4 +23,7 @@ chmod 666 inc/config.php inc/settings.php \
           inc/languages/english/*.php inc/languages/english/admin/*.php
 chmod 777 cache/ cache/themes/ uploads/ uploads/avatars/ ./admin/backups/
 
-cd ../
+echo "Bundling for deployment"
+zip -q -r ../mybb-deploy.zip ./*
+cd ..
+rm -rf mybb

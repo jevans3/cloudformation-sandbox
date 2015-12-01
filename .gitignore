@@ -5,6 +5,7 @@
 # Ctags
 .tags
 
-# myBB binary and extract folder
+# myBB base binary, extract folder, and deploy binary
 mybb
 mybb.zip
+mybb-deploy.zip
