@@ -32,6 +32,7 @@ else
   rm -rf mybb
 fi
 
+# create s3 bucket
 bucket_count=`aws s3api list-buckets | grep -c mybb-binaries`
 if [ "$bucket_count" != "1" ]; then
   echo "Creating s3 bucket mybb-binaries"
@@ -39,10 +40,25 @@ if [ "$bucket_count" != "1" ]; then
 else
   echo "s3 bucket already exists, skipping create."
 fi
+
+# upload binary to s3 bucket
 binary_count=`aws s3 ls mybb-binaries | grep -c mybb-deploy.zip`
 if [ "$binary_count" != "1" ]; then
   echo "Uploading s3 binary mybb-deploy.zip"
   aws s3 cp ./mybb-deploy.zip s3://mybb-binaries/
 else
-  echo "s3 binary already exists, skipping upload."
+  echo "binary already on s3, skipping upload."
 fi
+
+# upload template to s3 bucket
+template_count=`aws s3 ls mybb-binaries | grep -c mybb-application.template`
+if [ "$template_count" != "1" ]; then
+  echo "Uploading cloudformation template to s3"
+  aws s3 cp ./resources/mybb-application.template s3://mybb-binaries/
+else
+  echo "cloudformation template already on s3, skipping upload."
+fi
+
+# create cloudformation stack
+aws cloudformation create-stack --stack-name mershon-enterprises-mybb \
+                                --template-url https://mybb-binaries.s3.amazonaws.com/mybb-application.template

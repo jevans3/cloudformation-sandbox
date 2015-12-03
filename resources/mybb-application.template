@@ -1,0 +1,56 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "myBBAutoScalingApplication": {
+      "Type": "AWS::ElasticBeanstalk::Application",
+      "Properties": {
+        "Description": "myBB autoscaling application"
+      }
+    },
+    "myBBAutoScalingApplicationVersion": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": { "Ref": "myBBAutoScalingApplication" },
+        "Description": "v1806",
+        "SourceBundle": {
+          "S3Bucket": "mybb-binaries",
+          "S3Key": "mybb-deploy.zip"
+        }
+      }
+    },
+    "myBBAutoScalingConfigurationTemplate": {
+      "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
+      "Properties": {
+        "ApplicationName": { "Ref": "myBBAutoScalingApplication" },
+        "Description": "",
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MinSize",
+            "Value": "2"
+          },
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MaxSize",
+            "Value": "6"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "EnvironmentType",
+            "Value": "LoadBalanced"
+          }
+        ],
+        "SolutionStackName": "64bit Amazon Linux running PHP 5.3"
+      }
+    },
+    "myBBAutoScalingEnvironment": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "ApplicationName": { "Ref": "myBBAutoScalingApplication" },
+        "Description": "myBB Auto Scaling Environment",
+        "TemplateName": { "Ref": "myBBAutoScalingConfigurationTemplate" },
+        "VersionLabel": { "Ref": "myBBAutoScalingApplicationVersion" }
+      }
+    }
+  }
+}
