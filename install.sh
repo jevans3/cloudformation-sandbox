@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo "DB Username:"
+read dbusername
+echo "DB Password:"
+read dbpassword
+
 if [ -f "mybb.zip" ]; then
   echo "mybb.zip already present, skipping download."
 else
@@ -60,5 +65,8 @@ else
 fi
 
 # create cloudformation stack
-aws cloudformation create-stack --stack-name mershon-enterprises-mybb \
-                                --template-url https://mybb-binaries.s3.amazonaws.com/mybb-application.template
+aws cloudformation create-stack \
+  --stack-name mershon-enterprises-mybb2 \
+  --template-url https://mybb-binaries.s3.amazonaws.com/mybb-application.template \
+  --parameters ParameterKey=DBUsername,ParameterValue="$dbusername" \
+               ParameterKey=DBPassword,ParameterValue="$dbpassword"

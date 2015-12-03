@@ -1,6 +1,64 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters" : {
+    "DBName" : {
+      "Description" : "Database name",
+      "Type" : "String",
+      "Default" : "mybb"
+    },
+    "DBUsername" : {
+      "Description" : "Database user",
+      "Type" : "String",
+      "NoEcho" : "true"
+    },
+    "DBPassword" : {
+      "Description" : "Database password",
+      "Type" : "String",
+      "NoEcho" : "true"
+    },
+    "DBClass" : {
+      "Description" : "RDS instance type",
+      "Type" : "String",
+      "Default" : "db.t2.micro",
+      "AllowedValues" : ["db.t2.micro", "db.t2.small", "db.t2.medium", "db.t2.large", "db.r3.large", "db.r3.xlarge", "db.r3.2xlarge", "db.r3.4xlarge", "db.r3.8xlarge", "db.m4.large", "db.m4.xlarge", "db.m4.2xlarge", "db.m4.4xlarge", "db.m4.10xlarge", "db.m3.medium", "db.m3.large", "db.m3.xlarge", "db.m3.2xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type"
+    },
+    "DBAllocatedStorage" : {
+      "Description" : "Allocated RDS Size (GB)",
+      "Type" : "Number",
+      "Default" : "5"
+    }
+  },
   "Resources": {
+    "DBInstance" : {
+       "Type": "AWS::RDS::DBInstance",
+       "Properties": {
+          "DBName"            : { "Ref" : "DBName" },
+          "Engine"            : "Postgres",
+          "MasterUsername"    : { "Ref" : "DBUsername" },
+          "DBInstanceClass"   : { "Ref" : "DBClass" },
+          "DBSecurityGroups"  : [ { "Ref" : "DBSecurityGroup" } ],
+          "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
+          "MasterUserPassword": { "Ref" : "DBPassword" }
+       }
+    },
+    "DBSecurityGroup": {
+       "Type": "AWS::RDS::DBSecurityGroup",
+       "Properties": {
+          "DBSecurityGroupIngress": { "EC2SecurityGroupName": { "Ref": "WebServerSecurityGroup" } },
+          "GroupDescription"      : "Frontend Access"
+       }
+    },
+    "WebServerSecurityGroup" : {
+       "Type" : "AWS::EC2::SecurityGroup",
+       "Properties" : {
+          "GroupDescription" : "Enable HTTP access via port 80 and SSH access",
+          "SecurityGroupIngress" : [
+             {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+             {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}
+          ]
+       }
+    },
     "myBBAutoScalingApplication": {
       "Type": "AWS::ElasticBeanstalk::Application",
       "Properties": {
@@ -49,7 +107,14 @@
         "ApplicationName": { "Ref": "myBBAutoScalingApplication" },
         "Description": "myBB Auto Scaling Environment",
         "TemplateName": { "Ref": "myBBAutoScalingConfigurationTemplate" },
-        "VersionLabel": { "Ref": "myBBAutoScalingApplicationVersion" }
+        "VersionLabel": { "Ref": "myBBAutoScalingApplicationVersion" },
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:launchconfiguration",
+            "OptionName": "SecurityGroups",
+            "Value": { "Ref": "WebServerSecurityGroup" }
+          }
+        ]
       }
     }
   }
