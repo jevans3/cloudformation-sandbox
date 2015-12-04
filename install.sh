@@ -51,22 +51,12 @@ else
 fi
 
 # upload binary to s3 bucket
-binary_count=`aws s3 ls mybb-binaries | grep -c mybb-deploy.zip`
-if [ "$binary_count" != "1" ]; then
-  echo "Uploading s3 binary mybb-deploy.zip"
-  aws s3 cp ./mybb-deploy.zip s3://mybb-binaries/
-else
-  echo "binary already on s3, skipping upload."
-fi
+echo "Uploading s3 binary mybb-deploy.zip"
+aws s3 cp ./mybb-deploy.zip s3://mybb-binaries/
 
 # upload template to s3 bucket
-template_count=`aws s3 ls mybb-binaries | grep -c mybb-application.template`
-if [ "$template_count" != "1" ]; then
-  echo "Uploading cloudformation template to s3"
-  aws s3 cp ./resources/mybb-application.template s3://mybb-binaries/
-else
-  echo "cloudformation template already on s3, skipping upload."
-fi
+echo "Uploading cloudformation template to s3"
+aws s3 cp ./resources/mybb-application.template s3://mybb-binaries/
 
 # create cloudformation stack
 stack_id=`aws cloudformation create-stack \
