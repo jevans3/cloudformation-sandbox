@@ -86,7 +86,7 @@
           {
             "Namespace": "aws:autoscaling:asg",
             "OptionName": "MinSize",
-            "Value": "2"
+            "Value": "1"
           },
           {
             "Namespace": "aws:autoscaling:asg",
@@ -97,6 +97,11 @@
             "Namespace": "aws:elasticbeanstalk:environment",
             "OptionName": "EnvironmentType",
             "Value": "LoadBalanced"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:application",
+            "OptionName": "Application Healthcheck URL",
+            "Value": "/"
           }
         ],
         "SolutionStackName": "64bit Amazon Linux running PHP 5.3"
@@ -117,6 +122,12 @@
           }
         ]
       }
+    }
+  },
+  "Outputs": {
+    "rdsUrl": {
+      "Description": "URL for RDS connection",
+      "Value": { "Fn::GetAtt": ["DBInstance", "Endpoint.Address"] }
     }
   }
 }
