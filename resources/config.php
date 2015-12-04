@@ -1,5 +1,5 @@
 <?php
-$config['database']['type'] = 'postgres';
+$config['database']['type'] = 'pgsql';
 $config['database']['table_prefix'] = 'mybb_';
 $config['database']['database'] = 'mybb';
 
