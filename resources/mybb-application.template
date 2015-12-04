@@ -90,7 +90,7 @@
           {
             "Namespace": "aws:autoscaling:asg",
             "OptionName": "MinSize",
-            "Value": "2"
+            "Value": "1"
           },
           {
             "Namespace": "aws:autoscaling:asg",
@@ -106,6 +106,11 @@
             "Namespace": "aws:elasticbeanstalk:environment",
             "OptionName": "EnvironmentType",
             "Value": "LoadBalanced"
+          },
+          {
+            "Namespace" : "aws:elb:healthcheck",
+            "OptionName" : "Interval",
+            "Value" : "300"
           },
           {
             "Namespace": "aws:elasticbeanstalk:application",
