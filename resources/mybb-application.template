@@ -62,6 +62,7 @@
     "myBBAutoScalingApplication": {
       "Type": "AWS::ElasticBeanstalk::Application",
       "Properties": {
+        "ApplicationName": "myBB auto-scaling",
         "Description": "myBB autoscaling application"
       }
     },
