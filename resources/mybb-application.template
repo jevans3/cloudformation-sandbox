@@ -90,12 +90,17 @@
           {
             "Namespace": "aws:autoscaling:asg",
             "OptionName": "MinSize",
-            "Value": "1"
+            "Value": "2"
           },
           {
             "Namespace": "aws:autoscaling:asg",
             "OptionName": "MaxSize",
             "Value": "6"
+          },
+          {
+            "Namespace" : "aws:elb:policies",
+            "OptionName" : "Stickiness Policy",
+            "Value" : "true"
           },
           {
             "Namespace": "aws:elasticbeanstalk:environment",
