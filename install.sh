@@ -20,26 +20,22 @@ else
   fi
 fi
 
-if [ -f "mybb-deploy.zip" ]; then
-  echo "deploy binary already present, skipping bundle."
-else
-  echo "Extracting and setting permissions"
-  rm -rf mybb/
-  unzip -q mybb.zip
-  rm -rf Documentation
-  mv Upload mybb
-  cd mybb
-  mv inc/config.default.php inc/config.php
+echo "Extracting and setting permissions"
+rm -rf mybb-deploy.zip mybb/
+unzip -q mybb.zip
+rm -rf Documentation
+mv Upload mybb
+cd mybb
+mv inc/config.default.php inc/config.php
 
-  # permissions taken from myBB installation instructions
-  chmod 666 inc/config.php inc/settings.php \
-            inc/languages/english/*.php inc/languages/english/admin/*.php
-  chmod 777 cache/ cache/themes/ uploads/ uploads/avatars/ ./admin/backups/
+# permissions taken from myBB installation instructions
+chmod 666 inc/config.php inc/settings.php \
+        inc/languages/english/*.php inc/languages/english/admin/*.php
+chmod 777 cache/ cache/themes/ uploads/ uploads/avatars/ ./admin/backups/
 
-  echo "Bundling for deployment"
-  zip -q -r ../mybb-deploy.zip ./*
-  cd ..
-fi
+echo "Bundling for deployment"
+zip -q -r ../mybb-deploy.zip ./*
+cd ..
 
 # create s3 bucket
 bucket_count=`aws s3api list-buckets | grep -c mybb-binaries`
@@ -99,6 +95,12 @@ done;
 rds_url=`aws rds describe-db-instances \
   --db-instance-identifier "$rds_id" \
   --query 'DBInstances[0].Endpoint.Address' --output text`
+while [ "$rds_url" == "None" ]; do
+  sleep 1;
+  rds_url=`aws rds describe-db-instances \
+    --db-instance-identifier "$rds_id" \
+    --query 'DBInstances[0].Endpoint.Address' --output text`
+done;
 clear
 
 echo "***************************************************"

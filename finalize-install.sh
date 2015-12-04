@@ -16,5 +16,11 @@ cd ..
 echo "Uploading finalized s3 binary mybb-deploy.zip"
 aws s3 cp ./mybb-deploy.zip s3://mybb-binaries/
 
+echo "Adding additional instances to environment"
+aws elasticbeanstalk update-configuration-template \
+  --application-name "myBB auto-scaling" \
+  --template-name "myBBAutoScalingConfigurationTemplate" \
+  --option-settings "Namespace=aws:autoscaling:asg,OptionName=MinSize,Value=2"
+
 echo
 echo "DONE! Please enjoy your myBB forum application."
