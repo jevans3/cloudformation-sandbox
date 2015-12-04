@@ -85,12 +85,16 @@ echo -e "\033[32mYour stack is being created.\033[0m This process may take up to
 echo "Please wait. Do not cancel or exit this script."
 
 # wait until RDS url becomes available
-while [ "$rds_id" == "" ]; do
-  sleep 1;
 rds_id=`aws cloudformation describe-stack-resources \
   --stack-name "$stack_id" \
   --logical-resource-id "DBInstance"  \
   --query 'StackResources[0].PhysicalResourceId' --output text`
+while [ "$rds_id" == "None" ]; do
+  sleep 1;
+  rds_id=`aws cloudformation describe-stack-resources \
+    --stack-name "$stack_id" \
+    --logical-resource-id "DBInstance"  \
+    --query 'StackResources[0].PhysicalResourceId' --output text`
 done;
 rds_url=`aws rds describe-db-instances \
   --db-instance-identifier "$rds_id" \
