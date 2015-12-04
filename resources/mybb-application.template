@@ -1,6 +1,10 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Parameters" : {
+    "OperatorEmail" : {
+      "Description" : "Email of user",
+      "Type" : "String"
+    },
     "DBName" : {
       "Description" : "Database name",
       "Type" : "String",
@@ -102,6 +106,11 @@
             "Namespace": "aws:elasticbeanstalk:application",
             "OptionName": "Application Healthcheck URL",
             "Value": "/"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:sns:topics",
+            "OptionName": "Notification Endpoint",
+            "Value": { "Ref" : "OperatorEmail" }
           }
         ],
         "SolutionStackName": "64bit Amazon Linux running PHP 5.3"
@@ -122,12 +131,6 @@
           }
         ]
       }
-    }
-  },
-  "Outputs": {
-    "rdsUrl": {
-      "Description": "URL for RDS connection",
-      "Value": { "Fn::GetAtt": ["DBInstance", "Endpoint.Address"] }
     }
   }
 }

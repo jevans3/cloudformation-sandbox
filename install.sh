@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "This script configures an auto-scaling myBB CloudFormation template."
+echo
+echo -n "To begin, please enter your email address [ENTER]: "
+read operator_email
 echo -n "Please specify the database username to be used [ENTER]: "
 read dbusername
 echo -n "Please specify the database password to be used [ENTER]: "
@@ -20,6 +24,7 @@ if [ -f "mybb-deploy.zip" ]; then
   echo "deploy binary already present, skipping bundle."
 else
   echo "Extracting and setting permissions"
+  rm -rf mybb/
   unzip -q mybb.zip
   rm -rf Documentation
   mv Upload mybb
@@ -55,28 +60,22 @@ else
 fi
 
 # upload template to s3 bucket
-#template_count=`aws s3 ls mybb-binaries | grep -c mybb-application.template`
-#if [ "$template_count" != "1" ]; then
-#  echo "Uploading cloudformation template to s3"
+template_count=`aws s3 ls mybb-binaries | grep -c mybb-application.template`
+if [ "$template_count" != "1" ]; then
+  echo "Uploading cloudformation template to s3"
   aws s3 cp ./resources/mybb-application.template s3://mybb-binaries/
-#else
-#  echo "cloudformation template already on s3, skipping upload."
-#fi
+else
+  echo "cloudformation template already on s3, skipping upload."
+fi
 
 # create cloudformation stack
 stack_id=`aws cloudformation create-stack \
   --stack-name mershon-enterprises-mybb \
   --template-url https://mybb-binaries.s3.amazonaws.com/mybb-application.template \
-  --parameters ParameterKey=DBUsername,ParameterValue="$dbusername" \
+  --parameters ParameterKey=OperatorEmail,ParameterValue="$operator_email" \
+               ParameterKey=DBUsername,ParameterValue="$dbusername" \
                ParameterKey=DBPassword,ParameterValue="$dbpassword" \
   --query 'StackId' --output text`
-rds_id=`aws cloudformation describe-stack-resources \
-  --stack-name "$stack_id" \
-  --logical-resource-id "DBInstance"  \
-  --query 'StackResources[0].PhysicalResourceId' --output text`
-rds_url=`aws rds describe-db-instances \
-  --db-instance-identifier "$rds_id"
-  --query 'DBInstances[0].Endpoint.Address' --output text`
 elastic_id=`aws cloudformation describe-stack-resources \
   --stack-name "$stack_id" \
   --logical-resource-id "myBBAutoScalingApplication" \
@@ -84,14 +83,33 @@ elastic_id=`aws cloudformation describe-stack-resources \
 elastic_url=`aws elasticbeanstalk describe-environments \
   --application-name "myBB auto-scaling" \
   --query 'Environments[0].EndpointURL' --output text`
+rds_id=`aws cloudformation describe-stack-resources \
+  --stack-name "$stack_id" \
+  --logical-resource-id "DBInstance"  \
+  --query 'StackResources[0].PhysicalResourceId' --output text`
+
+echo
+echo "***************************************************"
+echo
+echo -e "\033[32mYour stack is being created.\033[0m This process may take up to 10 minutes to complete."
+echo "Please wait. Do not cancel or exit this script."
+
+# wait until RDS url becomes available
+while [ "$rds_id" == "" ]; do
+  sleep 1;
+rds_id=`aws cloudformation describe-stack-resources \
+  --stack-name "$stack_id" \
+  --logical-resource-id "DBInstance"  \
+  --query 'StackResources[0].PhysicalResourceId' --output text`
+done;
+rds_url=`aws rds describe-db-instances \
+  --db-instance-identifier "$rds_id" \
+  --query 'DBInstances[0].Endpoint.Address' --output text`
 clear
 
 echo "***************************************************"
 echo
-echo -e "\033[32mYour stack is being created.\033[0m This process may take up to 10 minutes to"
-echo -e "complete. When ready, please visit \033[36mhttp://$elastic_url\033[0m to configure myBB."
-echo
-echo "***************************************************"
+echo -e "Your stack is ready. Please visit \033[36mhttp://$elastic_url\033[0m to configure myBB."
 echo
 echo -e "\033[31mIMPORTANT:\033[0m Use the following database configuration settings:"
 echo
