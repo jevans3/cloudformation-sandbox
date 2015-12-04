@@ -113,11 +113,6 @@
             "Value" : "300"
           },
           {
-            "Namespace": "aws:elasticbeanstalk:application",
-            "OptionName": "Application Healthcheck URL",
-            "Value": "/"
-          },
-          {
             "Namespace": "aws:elasticbeanstalk:sns:topics",
             "OptionName": "Notification Endpoint",
             "Value": { "Ref" : "OperatorEmail" }

@@ -28,10 +28,12 @@ environment_name=`aws elasticbeanstalk describe-environments \
 aws elasticbeanstalk update-configuration-template \
   --application-name "myBB auto-scaling" \
   --template-name "$template_name" \
-  --option-settings "Namespace=aws:autoscaling:asg,OptionName=MinSize,Value=2"
+  --option-settings "Namespace=aws:autoscaling:asg,OptionName=MinSize,Value=2" \
+                    "Namespace=aws:elasticbeanstalk:application,OptionName=Application Healthcheck URL,Value=/"
 aws elasticbeanstalk update-environment \
   --environment-name "$environment_name" \
-  --option-settings "Namespace=aws:autoscaling:asg,OptionName=MinSize,Value=2"
+  --option-settings "Namespace=aws:autoscaling:asg,OptionName=MinSize,Value=2" \
+                    "Namespace=aws:elasticbeanstalk:application,OptionName=Application Healthcheck URL,Value=/"
 
 echo
 echo "DONE! Please enjoy your myBB forum application."
