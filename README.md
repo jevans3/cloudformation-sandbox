@@ -14,3 +14,13 @@ Instructions
 3. Install CloudFormation template:
 
   `./install.sh`
+
+  Follow the instructions to configure the app once the stack is built.
+
+4. Finalize the configuration:
+
+  `./finalize-install.sh`
+
+Assumptions
+--
+- `zip`, `unzip`, `sed`, and `wget` commands are available
